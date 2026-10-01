@@ -12,7 +12,7 @@ _2026-10-01 · embed model `gemini-embedding-001` (768 dims) · chunk 500 tok ·
 | Top score, answerable (min / avg) | 0.610 / 0.683 |
 | Top score, off-topic (max / avg) | 0.668 / 0.546 |
 
-**Recommended `SCORE_CUTOFF=0.56`**: answers 100% of real questions, blocks 83% of off-topic ones. (Current setting: 0.6)
+**Recommended `SCORE_CUTOFF=0.56`**: answers 100% of real questions, blocks 83% of off-topic ones. (Current setting: 0.56)
 
 | Cutoff | Real questions answered | Off-topic blocked |
 |---|---|---|
@@ -38,25 +38,36 @@ _2026-10-01 · embed model `gemini-embedding-001` (768 dims) · chunk 500 tok ·
 | 0.78 | 0% | 100% |
 | 0.80 | 0% | 100% |
 
+## Off-topic top scores
+
+Highest first. Anything at or above the cutoff reaches the LLM, which must refuse on its own.
+
+- 0.668 (passes gate) What is Northwind's current stock price?
+- 0.550 What is the salary of a junior engineer?
+- 0.529 Explain how photosynthesis works.
+- 0.526 What is the capital of France?
+- 0.503 Who won the 2022 football World Cup?
+- 0.500 How do I bake sourdough bread?
+
 ## Answers: 22/22 correct
 
 | | Question | Answer |
 |---|---|---|
 | ✅ | When was the company founded and by whom? | Northwind Robotics was founded in 2014 by Amina Odhiambo and Lars Becker [1]. |
-| ✅ | How many staff does Northwind have? | Northwind Robotics employs 340 people across its offices in Nairobi, Berlin, and Toronto [1]. |
+| ✅ | How many staff does Northwind have? | Northwind employs 340 people [1]. |
 | ✅ | What is the throughput of the Sorter X2? | The Sorter X2 can move up to 1,200 parcels per hour [1]. |
-| ✅ | How many vacation days do I get each year? | Full-time employees receive 24 days of paid annual leave per calendar year, plus local public holidays [1]. |
-| ✅ | Can I roll over unused holiday to next year? | Yes, up to 5 unused days of paid annual leave may be carried over to the next year, while any additional unused days beyond that will expire on 31 March [1]. |
+| ✅ | How many vacation days do I get each year? | Full-time employees receive 24 days of paid annual leave per calendar year [1]. |
+| ✅ | Can I roll over unused holiday to next year? | Yes, you can carry over up to 5 unused annual leave days to the next year, but anything beyond that expires on 31 March [1]. |
 | ✅ | How long is parental leave? | Parental leave is 16 weeks at full pay for all parents, regardless of gender [1]. |
 | ✅ | What cabin class can I fly on a long-haul trip? | For flights longer than six hours, employees may book premium economy [1]. |
-| ✅ | What is the hotel budget per night in London? | The hotel cost reimbursement limit in London is 220 US dollars per night [1]. |
+| ✅ | What is the hotel budget per night in London? | The hotel budget per night in London is 220 US dollars [1]. |
 | ✅ | How do I get reimbursed for travel costs? | To get reimbursed for travel costs, you must submit all expense claims through the Ledgerly app within 30 days of the trip, with photos of every receipt attache |
 | ✅ | What are the password requirements? | Passwords must be at least 14 characters long and are stored in the company password manager, Vaultkeep [1]. |
 | ✅ | What should I do if my laptop gets stolen? | If your laptop gets stolen, you must report it to the security team within one hour by emailing security@northwind.example [1]. |
 | ✅ | What is the project codename for the delivery robot? | The internal codename for the delivery robot is BLUEHERON [1]. |
 | ✅ | Who leads the outdoor delivery robot project? | The outdoor delivery robot project (Project BLUEHERON) is led by Dr. Wanjiru Kamau [1]. |
 | ✅ | How heavy a parcel can the new delivery robot carry? | The new delivery robot, BLUEHERON, can carry parcels of up to 25 kilograms [1]. |
-| ✅ | When is lunch served at the office? | The cafeteria serves free lunch between 12pm and 2pm on weekdays [1]. |
+| ✅ | When is lunch served at the office? | Free lunch is served in the cafeteria between 12pm and 2pm on weekdays [1]. |
 | ✅ | How do guests get into the building? | Visitors must be registered at reception at least one day in advance and must wear a visitor badge at all times [1]. |
 | ✅ | What is the capital of France? | I couldn't find that in the document. |
 | ✅ | How do I bake sourdough bread? | I couldn't find that in the document. |
