@@ -21,6 +21,12 @@ class Settings(BaseSettings):
     embed_dim: int = 768  # must match vector(768) in sql/001_init.sql
     gen_model: str = "gemini-2.5-flash"
 
+    # Ingestion
+    chunk_tokens: int = 500
+    chunk_overlap_tokens: int = 50
+    max_pages: int = 200
+    max_upload_mb: int = 10
+
     # Retrieval
     top_k: int = 5
     score_cutoff: float = 0.5  # tuned later with the eval harness (Step 7)
