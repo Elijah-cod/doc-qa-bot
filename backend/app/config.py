@@ -31,7 +31,7 @@ class Settings(BaseSettings):
 
     # Retrieval
     top_k: int = 5
-    score_cutoff: float = 0.6  # live runs: relevant ~0.67-0.74, unrelated ~0.50-0.54. Verified in Step 7.
+    score_cutoff: float = 0.56  # from evals/results.md: keeps 100% of real questions, blocks 83% off-topic
 
     @property
     def origins(self) -> list[str]:

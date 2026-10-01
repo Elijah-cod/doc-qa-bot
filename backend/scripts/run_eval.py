@@ -104,6 +104,11 @@ def main() -> None:
     ]
     lines += [f"| {r.cutoff:.2f}{' ←' if r is best else ''} | {r.answered:.0%} | {r.blocked:.0%} |" for r in rows]
 
+    lines += ["", "## Off-topic top scores", "",
+              "Highest first. Anything at or above the cutoff reaches the LLM, which must refuse on its own.", ""]
+    lines += [f"- {r.top_score:.3f} {'(passes gate) ' if r.top_score >= settings.score_cutoff else ''}{r.question}"
+              for r in sorted(off, key=lambda r: r.top_score, reverse=True)]
+
     misses = [r for r in scoped if rank(r) != 1]
     if misses:
         lines += ["", "## Not ranked first", ""]
