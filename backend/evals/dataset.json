@@ -1,0 +1,37 @@
+{
+  "document": "Northwind Robotics Employee Handbook (fictional test document)",
+  "pages": [
+    "Welcome to Northwind Robotics. The company was founded in 2014 in Nairobi by Amina Odhiambo and Lars Becker. We design autonomous warehouse robots that sort parcels for logistics companies. Today we employ 340 people across offices in Nairobi, Berlin and Toronto. Our mission is to make supply chains faster and safer by removing repetitive lifting from human jobs. Our flagship product, the Sorter X2, can move up to 1,200 parcels per hour.",
+    "Leave policy. Full-time employees receive 24 days of paid annual leave per calendar year, plus local public holidays. Up to 5 unused days may be carried over to the next year; anything beyond that expires on 31 March. Parental leave is 16 weeks at full pay for all parents, regardless of gender. Sick leave does not count against annual leave, but absences longer than three consecutive days require a doctor's note submitted to HR.",
+    "Expenses and travel. Employees may book economy class for flights under six hours and premium economy for longer flights. Hotel costs are reimbursed up to 150 US dollars per night, or 220 dollars in London, New York and Tokyo. The daily meal allowance while travelling is 60 dollars. All expense claims must be submitted through the Ledgerly app within 30 days of the trip, with photos of every receipt attached.",
+    "IT and security. Every laptop must use full-disk encryption and lock automatically after five minutes of inactivity. Passwords must be at least 14 characters long and are stored in the company password manager, Vaultkeep. Two-factor authentication is mandatory for email, code repositories and the HR system. Lost or stolen devices must be reported to the security team within one hour by emailing security@northwind.example.",
+    "Project BLUEHERON. BLUEHERON is the internal codename for our next-generation outdoor delivery robot. The pilot launches in March with a fleet of 40 robots in Kigali. The robot is designed to carry parcels of up to 25 kilograms and has a battery range of 18 kilometres. The project is led by Dr. Wanjiru Kamau. Details about BLUEHERON are confidential and must not be shared outside the company.",
+    "Office and facilities. The Nairobi office is open from 7am to 8pm on weekdays. The cafeteria serves free lunch between 12pm and 2pm. Employees can book meeting rooms through the Roomly calendar. Bicycle parking and showers are available in the basement. Visitors must be registered at reception at least one day in advance and must wear a visitor badge at all times."
+  ],
+  "questions": [
+    {"q": "When was the company founded and by whom?", "page": 1, "expect": ["2014"]},
+    {"q": "How many staff does Northwind have?", "page": 1, "expect": ["340"]},
+    {"q": "What is the throughput of the Sorter X2?", "page": 1, "expect": ["1,200"]},
+    {"q": "How many vacation days do I get each year?", "page": 2, "expect": ["24"]},
+    {"q": "Can I roll over unused holiday to next year?", "page": 2, "expect": ["5"]},
+    {"q": "How long is parental leave?", "page": 2, "expect": ["16 weeks"]},
+    {"q": "What cabin class can I fly on a long-haul trip?", "page": 3, "expect": ["premium economy"]},
+    {"q": "What is the hotel budget per night in London?", "page": 3, "expect": ["220"]},
+    {"q": "How do I get reimbursed for travel costs?", "page": 3, "expect": ["Ledgerly"]},
+    {"q": "What are the password requirements?", "page": 4, "expect": ["14"]},
+    {"q": "What should I do if my laptop gets stolen?", "page": 4, "expect": ["one hour"]},
+    {"q": "What is the project codename for the delivery robot?", "page": 5, "expect": ["BLUEHERON"]},
+    {"q": "Who leads the outdoor delivery robot project?", "page": 5, "expect": ["Kamau"]},
+    {"q": "How heavy a parcel can the new delivery robot carry?", "page": 5, "expect": ["25"]},
+    {"q": "When is lunch served at the office?", "page": 6, "expect": ["12"]},
+    {"q": "How do guests get into the building?", "page": 6, "expect": ["reception"]}
+  ],
+  "off_topic": [
+    "What is the capital of France?",
+    "How do I bake sourdough bread?",
+    "Who won the 2022 football World Cup?",
+    "What is Northwind's current stock price?",
+    "What is the salary of a junior engineer?",
+    "Explain how photosynthesis works."
+  ]
+}
