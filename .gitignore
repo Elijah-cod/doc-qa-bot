@@ -19,3 +19,6 @@ out/
 .DS_Store
 .vscode/
 .idea/
+
+# Eval dry runs (fake embedder, not meaningful)
+backend/evals/results_fake.md
