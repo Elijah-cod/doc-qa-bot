@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     # Models (override in .env without touching code)
     embed_model: str = "gemini-embedding-001"
     embed_dim: int = 768  # must match vector(768) in sql/001_init.sql
+    embed_batch_size: int = 100  # texts per Gemini request
     gen_model: str = "gemini-2.5-flash"
 
     # Ingestion
