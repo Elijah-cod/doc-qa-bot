@@ -1,11 +1,15 @@
+from uuid import UUID
+
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.config import Settings, get_settings
 from app.embeddings import Embedder, EmbeddingError, get_embedder
+from app.generation import GenerationError, Generator, get_generator
 from app.ingest import ingest_pdf
 from app.parsing import PDFParseError
+from app.rag import DocumentNotFound, answer_question
 from app.store import StoreError, VectorStore, get_store
 
 app = FastAPI(title="Doc Q&A Bot")
@@ -79,3 +83,52 @@ def delete_document(doc_id: str, store: VectorStore = Depends(get_store)):
     if n == 0:
         raise HTTPException(404, "Document not found.")
     return DeleteResponse(doc_id=doc_id, deleted_chunks=n)
+
+
+class AskRequest(BaseModel):
+    doc_id: UUID  # FastAPI rejects anything that isn't a valid UUID with a 422
+    question: str = Field(min_length=1, max_length=1000)
+
+
+class SourceOut(BaseModel):
+    n: int
+    page: int
+    chunk_index: int
+    score: float
+    content: str
+    cited: bool
+
+
+class AskResponse(BaseModel):
+    answer: str
+    grounded: bool
+    sources: list[SourceOut]
+
+
+@app.post("/ask", response_model=AskResponse)
+def ask(
+    req: AskRequest,
+    settings: Settings = Depends(get_settings),
+    embedder: Embedder = Depends(get_embedder),
+    store: VectorStore = Depends(get_store),
+    generator: Generator = Depends(get_generator),
+):
+    if not req.question.strip():
+        raise HTTPException(422, "Question is empty.")
+    try:
+        result = answer_question(req.question, str(req.doc_id), embedder=embedder, store=store,
+                                 generator=generator, settings=settings)
+    except DocumentNotFound:
+        raise HTTPException(404, "Document not found. Upload it again.")
+    except (EmbeddingError, GenerationError) as e:
+        raise HTTPException(502, f"AI service failed: {e}")
+    except StoreError as e:
+        raise HTTPException(503, f"Database unavailable: {e}")
+
+    return AskResponse(
+        answer=result.answer,
+        grounded=result.grounded,
+        sources=[SourceOut(n=s.n, page=s.chunk.page, chunk_index=s.chunk.chunk_index,
+                           score=round(s.chunk.score, 4), content=s.chunk.content, cited=s.cited)
+                 for s in result.sources],
+    )

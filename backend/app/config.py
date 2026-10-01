@@ -20,7 +20,8 @@ class Settings(BaseSettings):
     embed_model: str = "gemini-embedding-001"
     embed_dim: int = 768  # must match vector(768) in sql/001_init.sql
     embed_batch_size: int = 100  # texts per Gemini request
-    gen_model: str = "gemini-2.5-flash"
+    gen_model: str = "gemini-flash-latest"  # alias that tracks the newest Flash model
+    gen_fallback_model: str = "gemini-flash-lite-latest"  # used if the main model is overloaded; "" disables
 
     # Ingestion
     chunk_tokens: int = 500
@@ -30,7 +31,7 @@ class Settings(BaseSettings):
 
     # Retrieval
     top_k: int = 5
-    score_cutoff: float = 0.5  # tuned later with the eval harness (Step 7)
+    score_cutoff: float = 0.6  # live runs: relevant ~0.67-0.74, unrelated ~0.50-0.54. Verified in Step 7.
 
     @property
     def origins(self) -> list[str]:
