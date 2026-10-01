@@ -5,7 +5,7 @@ import re
 
 from app.store import RetrievedChunk
 
-DIM = 64
+DIM = 1024  # many slots so unrelated words rarely collide
 
 
 class FakeEmbedder:
@@ -67,3 +67,18 @@ class InMemoryStore:
 
     def doc_rows(self, doc_id):
         return [r for r in self.rows if r["doc_id"] == doc_id]
+
+
+class FakeGenerator:
+    """Records prompts; returns a canned answer (or raises)."""
+
+    def __init__(self, answer: str = "The codename is BLUEHERON [1].", fail_with: Exception | None = None):
+        self.prompts: list[str] = []
+        self.answer = answer
+        self.fail_with = fail_with
+
+    def generate(self, prompt: str) -> str:
+        self.prompts.append(prompt)
+        if self.fail_with:
+            raise self.fail_with
+        return self.answer
