@@ -75,7 +75,10 @@ def upload(
 
 
 @app.delete("/documents/{doc_id}", response_model=DeleteResponse)
+@app.post("/documents/{doc_id}/delete", response_model=DeleteResponse, include_in_schema=False)
 def delete_document(doc_id: str, store: VectorStore = Depends(get_store)):
+    # The POST alias exists for navigator.sendBeacon(), which browsers use to fire a
+    # request while the tab is closing. sendBeacon can only POST.
     try:
         n = store.delete_document(doc_id)
     except StoreError as e:

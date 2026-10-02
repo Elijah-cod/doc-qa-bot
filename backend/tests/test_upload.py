@@ -104,3 +104,9 @@ def test_cors_allows_frontend_origin(client):
     r = client.options("/upload", headers={"Origin": "http://localhost:3000",
                                            "Access-Control-Request-Method": "POST"})
     assert r.headers.get("access-control-allow-origin") == "http://localhost:3000"
+
+
+def test_beacon_delete_alias(client, make_pdf):
+    doc_id = upload(client, make_pdf(["a"])).json()["doc_id"]
+    r = client.post(f"/documents/{doc_id}/delete")   # what navigator.sendBeacon sends
+    assert r.status_code == 200 and r.json()["deleted_chunks"] == 1
