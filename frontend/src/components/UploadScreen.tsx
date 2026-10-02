@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { MAX_UPLOAD_MB } from "@/lib/api";
+import { useServerStatus } from "@/lib/useServerStatus";
 import { Icon } from "./Icon";
 
 const STEPS = ["Reading pages…", "Splitting into passages…", "Creating embeddings…", "Saving to the index…"];
@@ -12,6 +13,7 @@ export function UploadScreen({ uploading, error, onFile }: Props) {
   const input = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [step, setStep] = useState(0);
+  const server = useServerStatus();
 
   // The backend doesn't report progress, so cycle through the pipeline stages while we wait.
   useEffect(() => {
@@ -29,6 +31,19 @@ export function UploadScreen({ uploading, error, onFile }: Props) {
       <p className="mt-space-xs text-body-lg text-on-surface-variant">
         Every answer links to the exact passages and pages it came from, so you can check it.
       </p>
+
+      {server === "waking" && (
+        <div role="status" className="mt-space-lg flex items-center gap-space-sm rounded-xl bg-surface-container px-space-md py-space-sm text-body-sm text-on-surface-variant">
+          <Icon name="progress_activity" size={16} className="animate-spin text-primary" />
+          <span>Waking up the server. The free hosting plan sleeps when idle; this can take up to a minute.</span>
+        </div>
+      )}
+      {server === "down" && (
+        <div role="alert" className="mt-space-lg flex items-center gap-space-sm rounded-xl bg-error-container px-space-md py-space-sm text-body-sm text-on-error-container">
+          <Icon name="cloud_off" size={16} />
+          <span>The server isn&apos;t responding right now. Please try again in a few minutes.</span>
+        </div>
+      )}
 
       <div
         role="button"

@@ -24,6 +24,7 @@ export async function toApiError(res: Response): Promise<ApiError> {
     404: "That document no longer exists. Please upload it again.",
     413: `File is too large (max ${MAX_UPLOAD_MB} MB).`,
     415: "Only PDF files are supported.",
+    429: "You're sending requests too quickly. Please wait a few minutes.",
     502: "The AI service is busy. Please try again in a moment.",
     503: "The database is unavailable. Please try again in a moment.",
   };
@@ -64,4 +65,15 @@ export function releaseDocument(docId: string): void {
   const url = `${API_URL}/documents/${encodeURIComponent(docId)}/delete`;
   if (typeof navigator !== "undefined" && navigator.sendBeacon?.(url)) return;
   fetch(url, { method: "POST", keepalive: true }).catch(() => {});
+}
+
+/** True if the backend answers /health within `timeoutMs`. Free hosting sleeps when idle,
+ *  so the first call after a quiet period can take up to a minute. */
+export async function pingServer(timeoutMs: number, fetchImpl: typeof fetch = fetch): Promise<boolean> {
+  try {
+    const res = await fetchImpl(`${API_URL}/health`, { signal: AbortSignal.timeout(timeoutMs), cache: "no-store" });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }

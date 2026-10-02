@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ApiError, askQuestion, uploadPdf } from "./api";
+import { ApiError, askQuestion, pingServer, uploadPdf } from "./api";
 
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
@@ -43,5 +43,23 @@ describe("api client", () => {
     expect(err).toBeInstanceOf(ApiError);
     expect(err.status).toBe(0);
     expect(err.message).toContain("Is the backend running?");
+  });
+});
+
+describe("pingServer", () => {
+  it("is true when /health answers", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(json(200, { ok: true }));
+    expect(await pingServer(1000, fetchMock)).toBe(true);
+    expect(fetchMock.mock.calls[0][0]).toBe("http://localhost:8000/health");
+  });
+
+  it("is false on errors or timeouts", async () => {
+    expect(await pingServer(1000, vi.fn().mockRejectedValue(new Error("timeout")))).toBe(false);
+    expect(await pingServer(1000, vi.fn().mockResolvedValue(new Response("", { status: 503 })))).toBe(false);
+  });
+
+  it("explains rate limiting", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response("", { status: 429 }));
+    await expect(askQuestion("d", "q", fetchMock)).rejects.toThrow("too quickly");
   });
 });
