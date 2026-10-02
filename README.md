@@ -2,7 +2,7 @@
 
 Upload a PDF and ask questions about it. Each answer cites the **exact paragraphs and page numbers** it came from, so you can check it yourself.
 
-A retrieval-augmented generation (RAG) pipeline built from scratch: **FastAPI** · **Supabase pgvector** · **Gemini** (embeddings + generation) · Next.js UI *(in progress)*.
+A retrieval-augmented generation (RAG) pipeline built from scratch: **FastAPI** · **Supabase pgvector** · **Gemini** (embeddings + generation) · **Next.js** chat UI.
 
 ```
 Q: How many vacation days do I get each year?
@@ -24,7 +24,8 @@ A: Full-time employees receive 24 days of paid annual leave per calendar year, p
 | **768-dim embeddings** | pgvector's HNSW index supports up to 2,000 dims; 768 keeps search fast with negligible quality loss. |
 | **Embed before writing** | If Gemini fails mid-upload the database is untouched; if the DB fails mid-insert, partial rows are cleaned up. |
 | **Retries + fallback model** | Exponential backoff on 429/5xx; if the main model stays overloaded, the same prompt goes to a lighter model. |
-| **Interfaces + fakes** | Routes depend on `Embedder` / `VectorStore` / `Generator` protocols, so 76 tests run offline in under a second. |
+| **Interfaces + fakes** | Routes depend on `Embedder` / `VectorStore` / `Generator` protocols, so 84 backend tests run offline in about a second. |
+| **Built for a public URL** | Per-IP rate limits protect the Gemini quota; an hourly database job deletes anything a closed tab left behind. |
 
 ---
 
@@ -129,16 +130,40 @@ cp .env.example .env          # then fill in the three keys
 uvicorn app.main:app --reload    # http://localhost:8000/docs
 ```
 
+Frontend, in a second terminal:
+
+```bash
+cd frontend
+cp .env.example .env.local    # NEXT_PUBLIC_API_URL=http://localhost:8000
+npm install
+npm run dev                   # http://localhost:3000
+```
+
+---
+
+## Deployment
+
+| Part | Host | Notes |
+|---|---|---|
+| Frontend | **Vercel** (Hobby) | Root directory `frontend`, env `NEXT_PUBLIC_API_URL` |
+| Backend | **Render** (Docker, from `render.yaml`) | Free plan sleeps after 15 min idle (~1 min cold start; the UI shows "waking up"). Starter plan stays on. |
+| Database | **Supabase** | Run `sql/001_init.sql`, then `sql/002_cleanup.sql` (hourly cleanup via `pg_cron`) |
+| CI | **GitHub Actions** | `ci.yml` runs both test suites and a production build on every push; `keepalive.yml` pings `/ready` every 3 days so Supabase's free tier doesn't pause |
+
+Health endpoints: `GET /health` (process up) and `GET /ready` (database reachable).
+
 ---
 
 ## Testing
 
 ```bash
-python -m pytest -q                  # 76 offline tests, no network, < 1s
+python -m pytest -q                  # 84 offline tests, no network, ~1s
 python -m pytest -q -m live -s       # 8 tests against real Gemini + Supabase
 python scripts/run_eval.py           # retrieval eval → evals/results.md
 python scripts/run_eval.py --answers # + end-to-end answer checks (uses LLM quota)
 python scripts/inspect_pdf.py file.pdf  # see how a PDF is parsed and chunked
+
+cd ../frontend && npm test           # 26 tests: citation parser, API client, chat state, file checks
 ```
 
 | Layer | Covers |
@@ -166,6 +191,8 @@ All settings live in `backend/.env`. Only the first three are required.
 | `TOP_K` | `5` | chunks sent to the LLM |
 | `SCORE_CUTOFF` | `0.56` | from the eval sweep; re-run the eval if you change models |
 | `MAX_PAGES` / `MAX_UPLOAD_MB` | `200` / `10` | upload limits |
+| `UPLOAD_LIMIT_PER_HOUR` / `ASK_LIMIT_PER_HOUR` | `10` / `60` | per client IP; `0` disables |
+| `ALLOWED_ORIGIN_REGEX` | | optional, e.g. Vercel preview URLs |
 
 ---
 
@@ -188,7 +215,7 @@ backend/
 ├── evals/              # dataset, metrics, results.md
 ├── scripts/            # run_eval.py, inspect_pdf.py
 └── tests/              # unit, route (fakes), live/
-frontend/               # Next.js chat UI (in progress)
+frontend/               # Next.js chat UI (upload, chat, citation chips, sources panel)
 docs/                   # architecture diagram (Excalidraw)
 ```
 
@@ -198,9 +225,9 @@ docs/                   # architecture diagram (Excalidraw)
 
 **Current scope (MVP):** single PDF per chat, text-based PDFs only (no OCR), no auth, documents can be deleted via the API.
 
-- [ ] Next.js chat UI with source cards and citation highlighting
+- [x] Next.js chat UI with source cards and citation highlighting
 - [ ] Stream answers token-by-token (SSE)
 - [ ] Hybrid search: vector + Postgres full-text, merged with reciprocal rank fusion
 - [ ] Reranker: retrieve top 20, rerank to top 5
 - [ ] Query rewriting so follow-up questions work in a conversation
-- [ ] Deploy: Vercel (UI) · Render or Hugging Face Spaces (API) · Supabase
+- [x] Deploy: Vercel (UI) · Render (API, Docker) · Supabase
