@@ -15,6 +15,8 @@ class Settings(BaseSettings):
 
     # CORS: comma-separated list of allowed frontend origins
     allowed_origins: str = "http://localhost:3000"
+    # Optional regex for extra origins, e.g. Vercel preview URLs: https://doc-qa-.*\.vercel\.app
+    allowed_origin_regex: str = ""
 
     # Models (override in .env without touching code)
     embed_model: str = "gemini-embedding-001"
@@ -28,6 +30,10 @@ class Settings(BaseSettings):
     chunk_overlap_tokens: int = 50
     max_pages: int = 200
     max_upload_mb: int = 10
+
+    # Abuse protection (per client IP, per hour; 0 disables)
+    upload_limit_per_hour: int = 10
+    ask_limit_per_hour: int = 60
 
     # Retrieval
     top_k: int = 5

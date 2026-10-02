@@ -25,6 +25,7 @@ class VectorStore(Protocol):
     def insert_chunks(self, doc_id: str, chunks: list[Chunk], vectors: list[list[float]]) -> None: ...
     def match(self, doc_id: str, query_vector: list[float], k: int) -> list[RetrievedChunk]: ...
     def delete_document(self, doc_id: str) -> int: ...
+    def ping(self) -> None: ...
 
 
 class SupabaseStore:
@@ -62,6 +63,14 @@ class SupabaseStore:
         except Exception as e:
             raise StoreError(f"Delete failed: {e}") from e
         return len(res.data or [])
+
+
+    def ping(self):
+        """Cheapest possible query, to check the database is reachable."""
+        try:
+            self.client.table("chunks").select("id").limit(1).execute()
+        except Exception as e:
+            raise StoreError(f"Ping failed: {e}") from e
 
 
 @lru_cache

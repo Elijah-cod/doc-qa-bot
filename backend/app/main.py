@@ -10,6 +10,7 @@ from app.generation import GenerationError, Generator, get_generator
 from app.ingest import ingest_pdf
 from app.parsing import PDFParseError
 from app.rag import DocumentNotFound, answer_question
+from app.ratelimit import rate_limit
 from app.store import StoreError, VectorStore, get_store
 
 app = FastAPI(title="Doc Q&A Bot")
@@ -17,6 +18,7 @@ app = FastAPI(title="Doc Q&A Bot")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=get_settings().origins,  # only our frontend may call the API from a browser
+    allow_origin_regex=get_settings().allowed_origin_regex or None,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -36,10 +38,22 @@ class DeleteResponse(BaseModel):
 
 @app.get("/health")
 def health():
+    """Liveness: the process is up. Used by the host's health check (no external calls)."""
     return {"ok": True}
 
 
-@app.post("/upload", response_model=UploadResponse)
+@app.get("/ready")
+def ready(store: VectorStore = Depends(get_store)):
+    """Readiness: the database answers. Also used by the keep-alive job so Supabase's
+    free tier doesn't pause the project for inactivity."""
+    try:
+        store.ping()
+    except StoreError:
+        raise HTTPException(503, "Database unavailable.")
+    return {"ok": True, "database": "ok"}
+
+
+@app.post("/upload", response_model=UploadResponse, dependencies=[Depends(rate_limit("upload"))])
 def upload(
     file: UploadFile = File(...),
     settings: Settings = Depends(get_settings),
@@ -108,7 +122,7 @@ class AskResponse(BaseModel):
     sources: list[SourceOut]
 
 
-@app.post("/ask", response_model=AskResponse)
+@app.post("/ask", response_model=AskResponse, dependencies=[Depends(rate_limit("ask"))])
 def ask(
     req: AskRequest,
     settings: Settings = Depends(get_settings),

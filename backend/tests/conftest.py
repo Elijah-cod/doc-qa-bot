@@ -1,6 +1,8 @@
 import pymupdf
 import pytest
 
+from app.ratelimit import reset_limits
+
 
 def build_pdf(pages: list[str]) -> bytes:
     """Make a real PDF in memory. Each string is one page; '' makes a blank page."""
@@ -17,3 +19,11 @@ def build_pdf(pages: list[str]) -> bytes:
 @pytest.fixture
 def make_pdf():
     return build_pdf
+
+
+@pytest.fixture(autouse=True)
+def _fresh_rate_limits():
+    """Rate-limit counters are global; start every test with a clean slate."""
+    reset_limits()
+    yield
+    reset_limits()

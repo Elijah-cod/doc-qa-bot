@@ -65,6 +65,10 @@ class InMemoryStore:
         self.deleted.append(doc_id)
         return before - len(self.rows)
 
+    def ping(self):
+        if self.fail_insert_with:
+            raise self.fail_insert_with
+
     def doc_rows(self, doc_id):
         return [r for r in self.rows if r["doc_id"] == doc_id]
 
