@@ -1,0 +1,22 @@
+# Render Blueprint: New -> Blueprint -> pick this repo. Secrets are entered in the dashboard.
+services:
+  - type: web
+    name: doc-qa-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free            # change to "starter" ($7/mo) for no cold starts
+    region: frankfurt
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false        # e.g. https://your-app.vercel.app
+      - key: ALLOWED_ORIGIN_REGEX
+        sync: false        # optional, e.g. https://your-app-.*\.vercel\.app for preview deploys
